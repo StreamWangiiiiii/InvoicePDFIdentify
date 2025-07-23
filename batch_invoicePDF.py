@@ -8,7 +8,7 @@ from mysql.connector import Error
 from mysql.connector.cursor import MySQLCursor
 
 # 配置区
-API_KEY = "app-PK3j1NKerGg865T99Esb73zL"
+API_KEY = "apikey"
 DIFY_SERVER = "http://localhost/v1"
 DIR_PATH = "/Users/streamwang/Downloads/invoice"
 USER = "StreamWang"
@@ -21,7 +21,7 @@ DB_CONFIG = {
     "host": "localhost",
     "database": "Invoice",  # 确保数据库已创建
     "user": "root",         # MySQL 用户名（默认root）
-    "password": "wx123",    # MySQL 密码
+    "password": "pwd",    # MySQL 密码
     "port": 3306,           # MySQL 默认端口
     "ssl_disabled": True    # MySQL 禁用SSL的参数（适配驱动）
 }
