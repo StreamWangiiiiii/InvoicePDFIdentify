@@ -1,0 +1,551 @@
+app:
+  description: 批量识别发票并一键导出Excel
+  icon: 🤖
+  icon_background: '#FFEAD5'
+  mode: workflow
+  name: 发票识别助手
+  use_icon_as_answer_icon: false
+dependencies:
+- current_identifier: null
+  type: marketplace
+  value:
+    marketplace_plugin_unique_identifier: langgenius/siliconflow:0.0.20@a0297ff9ba92d57b12efa51dad87bbf68f6556979d2f32ed15fc833a3a1f4f39
+- current_identifier: null
+  type: marketplace
+  value:
+    marketplace_plugin_unique_identifier: kalochin/pdf_process:0.0.4@1fe29eabc04f0a11e79671d18adb8daa9b2ecc6dec6fdbc19e6825a15f7a236a
+kind: app
+version: 0.3.0
+workflow:
+  conversation_variables: []
+  environment_variables: []
+  features:
+    file_upload:
+      allowed_file_extensions:
+      - .JPG
+      - .JPEG
+      - .PNG
+      - .GIF
+      - .WEBP
+      - .SVG
+      allowed_file_types:
+      - image
+      allowed_file_upload_methods:
+      - local_file
+      - remote_url
+      enabled: false
+      fileUploadConfig:
+        audio_file_size_limit: 50
+        batch_count_limit: 5
+        file_size_limit: 15
+        image_file_size_limit: 10
+        video_file_size_limit: 100
+        workflow_file_upload_limit: 10
+      image:
+        enabled: false
+        number_limits: 3
+        transfer_methods:
+        - local_file
+        - remote_url
+      number_limits: 3
+    opening_statement: ''
+    retriever_resource:
+      enabled: true
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: false
+    suggested_questions: []
+    suggested_questions_after_answer:
+      enabled: false
+    text_to_speech:
+      enabled: false
+      language: ''
+      voice: ''
+  graph:
+    edges:
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: code
+      id: 1753084622669-source-1753085399938-target
+      selected: false
+      source: '1753084622669'
+      sourceHandle: source
+      target: '1753085399938'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: end
+      id: 1753085399938-source-1753085496874-target
+      selected: false
+      source: '1753085399938'
+      sourceHandle: source
+      target: '1753085496874'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: start
+        targetType: if-else
+      id: 1753084497988-source-17531506868760-target
+      source: '1753084497988'
+      sourceHandle: source
+      target: '17531506868760'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: llm
+      id: 17531506868760-true-1753084622669-target
+      source: '17531506868760'
+      sourceHandle: 'true'
+      target: '1753084622669'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: tool
+      id: 17531506868760-425ca04e-8a73-417c-acc0-df5944c3fdb0-17531506690560-target
+      source: '17531506868760'
+      sourceHandle: 425ca04e-8a73-417c-acc0-df5944c3fdb0
+      target: '17531506690560'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: tool
+        targetType: llm
+      id: 17531506690560-source-1753084622669-target
+      source: '17531506690560'
+      sourceHandle: source
+      target: '1753084622669'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    nodes:
+    - data:
+        desc: ''
+        selected: false
+        title: 开始
+        type: start
+        variables:
+        - allowed_file_extensions: []
+          allowed_file_types:
+          - image
+          - document
+          allowed_file_upload_methods:
+          - local_file
+          - remote_url
+          label: 发票文件
+          max_length: 5
+          options: []
+          required: true
+          type: file-list
+          variable: upload
+      height: 90
+      id: '1753084497988'
+      position:
+        x: -52.620391714865036
+        y: 282
+      positionAbsolute:
+        x: -52.620391714865036
+        y: 282
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: ''
+        model:
+          completion_params: {}
+          mode: chat
+          name: Qwen/Qwen2.5-VL-72B-Instruct
+          provider: langgenius/siliconflow/siliconflow
+        prompt_template:
+        - id: 909ef2d2-3080-48b6-bc52-2e399ed7bc9e
+          role: system
+          text: '# 角色
+
+            你是一个专业的发票信息提取助手。
+
+
+            # 任务
+
+            你的任务是从图片中，精准地提取所有关键信息，并严格按照指定的 JSON 格式输出。请忽略文本中与发票无关的干扰项（如“下载次数”）。
+
+
+            # 输入变量
+
+            发票的原始文本内容将通过图片识别的内容传入。
+
+
+            # 输出要求
+
+            1.**严格的JSON格式**：你的回答必须是一个完整的、格式正确的 JSON 对象，不能包含任何 JSON 之外的解释、注释或文字。
+
+            2.**数据清洗**：
+
+                * 对于金额和数量，只保留数字，去除货币符号（如 `¥`）。
+
+                * 对于日期，统一输出为 `YYYY-MM-DD` 格式。
+
+                * 对于税率，输出百分比字符串，例如 `"13%"`。
+
+                * 如果某一项信息在发票中不存在，请使用 `null` 或者空字符串 `""` 作为值。
+
+            3.**处理项目列表**：发票中的“项目名称”部分可能包含多个商品或服务，甚至可能包含折扣（金额为负数）。你需要将每一个项目都作为一个独立的对象，放入 `items` 数组中。
+
+
+            # JSON 输出格式
+
+            ```json
+
+            {
+
+              "invoice_title": "string",
+
+              "invoice_number": "string",
+
+              "issue_date": "string",
+
+              "buyer_info": {
+
+                "name": "string",
+
+                "tax_id": "string"
+
+              },
+
+              "seller_info": {
+
+                "name": "string",
+
+                "tax_id": "string"
+
+              },
+
+              "items": [
+
+                {
+
+                  "name": "string",
+
+                  "model": "string",
+
+                  "unit": "string",
+
+                  "quantity": "number | null",
+
+                  "unit_price": "number | null",
+
+                  "amount": "number",
+
+                  "tax_rate": "string",
+
+                  "tax_amount": "number"
+
+                }
+
+              ],
+
+              "total_amount_exclusive_tax": "number",
+
+              "total_tax_amount": "number",
+
+              "total_amount_inclusive_tax": {
+
+                "in_words": "string",
+
+                "in_figures": "number"
+
+              },
+
+              "remarks": "string",
+
+              "issuer": "string"
+
+            }
+
+            '
+        selected: false
+        title: LLM
+        type: llm
+        variables: []
+        vision:
+          configs:
+            detail: high
+            variable_selector:
+            - '17531506690560'
+            - files
+          enabled: true
+      height: 90
+      id: '1753084622669'
+      position:
+        x: 924.7202690824474
+        y: 309.09448862991866
+      positionAbsolute:
+        x: 924.7202690824474
+        y: 309.09448862991866
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        code: "import json\nimport re\n\ndef main(output: str) -> dict:\n    # 去除\
+          \ markdown 代码块标记\n    output = re.sub(r\"^```[\\w]*\\s*\", \"\", output.strip(),\
+          \ flags=re.IGNORECASE)\n    output = re.sub(r\"```$\", \"\", output.strip())\n\
+          \    output = output.strip()\n\n    try:\n        data = json.loads(output)\n\
+          \    except json.JSONDecodeError as e:\n        print(f\"JSON 解析错误: {e}\"\
+          )\n        return {\"result\": {}}\n    \n    # 处理日期格式\n    date_str = data.get(\"\
+          issue_date\", \"\").replace(\"/\", \"-\").replace(\".\", \"-\").strip()\n\
+          \    \n    # 处理商品列表\n    items_str = json.dumps(data.get(\"items\", []),\
+          \ ensure_ascii=False)\n    \n    # 构建记录字典\n    record = {\n        \"invoice_title\"\
+          : data.get(\"invoice_title\", \"\"),\n        \"invoice_code\": data.get(\"\
+          invoice_number\", \"\"),\n        \"issue_date\": date_str,\n        \"\
+          buyer_name\": data.get(\"buyer_info\", {}).get(\"name\", \"\"),\n      \
+          \  \"buyer_tax_id\": data.get(\"buyer_info\", {}).get(\"tax_id\", \"\"),\n\
+          \        \"seller_name\": data.get(\"seller_info\", {}).get(\"name\", \"\
+          \"),\n        \"seller_tax_id\": data.get(\"seller_info\", {}).get(\"tax_id\"\
+          , \"\"),\n        \"items\": items_str,\n        \"total_amount\": data.get(\"\
+          total_amount_exclusive_tax\", \"\"),\n        \"total_tax\": data.get(\"\
+          total_tax_amount\", \"\"),\n        \"total_with_tax\": data.get(\"total_amount_inclusive_tax\"\
+          , {}).get(\"in_figures\", \"\"),\n        \"total_with_tax_in_words\": data.get(\"\
+          total_amount_inclusive_tax\", {}).get(\"in_words\", \"\"),\n        \"remarks\"\
+          : data.get(\"remarks\", \"\"),\n        \"issuer\": data.get(\"issuer\"\
+          , \"\")\n    }\n    \n    return {\"result\": record}\n\n# 添加主程序入口\nif __name__\
+          \ == \"__main__\":\n    # 示例输入（需要是有效的 JSON 字符串）\n    sample_input = \"\"\
+          \"\n    {\n        \"invoice_title\": \"测试发票\",\n        \"invoice_number\"\
+          : \"12345678\",\n        \"issue_date\": \"2023/01/01\",\n        \"buyer_info\"\
+          : {\n            \"name\": \"买方名称\",\n            \"tax_id\": \"1234567890\"\
+          \n        },\n        \"seller_info\": {\n            \"name\": \"卖方名称\"\
+          ,\n            \"tax_id\": \"0987654321\"\n        },\n        \"items\"\
+          : [\n            {\"name\": \"商品1\", \"quantity\": 1, \"price\": 100}\n\
+          \        ],\n        \"total_amount_exclusive_tax\": \"100.00\",\n     \
+          \   \"total_tax_amount\": \"13.00\",\n        \"total_amount_inclusive_tax\"\
+          : {\n            \"in_figures\": \"113.00\",\n            \"in_words\":\
+          \ \"壹佰壹拾叁元整\"\n        },\n        \"remarks\": \"备注信息\",\n        \"issuer\"\
+          : \"开票人\"\n    }\n    \"\"\"\n    \n    result = main(sample_input)\n  \
+          \  print(json.dumps(result, ensure_ascii=False, indent=2))"
+        code_language: python3
+        desc: ''
+        outputs:
+          result:
+            children: null
+            type: object
+        selected: false
+        title: 代码执行
+        type: code
+        variables:
+        - value_selector:
+          - '1753084622669'
+          - text
+          value_type: string
+          variable: output
+      height: 54
+      id: '1753085399938'
+      position:
+        x: 1223.016166212991
+        y: 309.09448862991866
+      positionAbsolute:
+        x: 1223.016166212991
+        y: 309.09448862991866
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        desc: ''
+        outputs:
+        - value_selector:
+          - '1753085399938'
+          - result
+          value_type: object
+          variable: result
+        selected: false
+        title: 结束
+        type: end
+      height: 90
+      id: '1753085496874'
+      position:
+        x: 1522.7380890608986
+        y: 309.09448862991866
+      positionAbsolute:
+        x: 1522.7380890608986
+        y: 309.09448862991866
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        desc: ''
+        is_team_authorization: true
+        output_schema: null
+        paramSchemas:
+        - auto_generate: null
+          default: null
+          form: llm
+          human_description:
+            en_US: PDF file to convert to PNG images
+            ja_JP: PDF file to convert to PNG images
+            pt_BR: PDF file to convert to PNG images
+            zh_Hans: 要转换为PNG图片的PDF文件
+          label:
+            en_US: PDF Content
+            ja_JP: PDF Content
+            pt_BR: PDF Content
+            zh_Hans: PDF 内容
+          llm_description: PDF file content to be converted to PNG images
+          max: null
+          min: null
+          name: pdf_content
+          options: []
+          placeholder: null
+          precision: null
+          required: true
+          scope: null
+          template: null
+          type: file
+        - auto_generate: null
+          default: 2
+          form: llm
+          human_description:
+            en_US: Zoom factor for image quality (default is 2)
+            ja_JP: Zoom factor for image quality (default is 2)
+            pt_BR: Zoom factor for image quality (default is 2)
+            zh_Hans: 图像质量的缩放因子（默认为2）
+          label:
+            en_US: Zoom Factor
+            ja_JP: Zoom Factor
+            pt_BR: Zoom Factor
+            zh_Hans: 缩放因子
+          llm_description: Zoom factor to control the quality of output PNG images
+          max: null
+          min: null
+          name: zoom
+          options: []
+          placeholder: null
+          precision: null
+          required: false
+          scope: null
+          template: null
+          type: number
+        params:
+          pdf_content: ''
+          zoom: ''
+        provider_id: kalochin/pdf_process/pdf_process
+        provider_name: kalochin/pdf_process/pdf_process
+        provider_type: builtin
+        selected: false
+        title: PDF转PNG转换器 (1)
+        tool_configurations: {}
+        tool_description: 一个将PDF文件转换为PNG图片的工具
+        tool_label: PDF转PNG转换器
+        tool_name: pdf_to_png
+        tool_parameters:
+          pdf_content:
+            type: variable
+            value:
+            - '1753084497988'
+            - upload
+          zoom:
+            type: constant
+            value: 2
+        type: tool
+        version: '2'
+      height: 86
+      id: '17531506690560'
+      position:
+        x: 584.6521229287074
+        y: 385.4554271301072
+      positionAbsolute:
+        x: 584.6521229287074
+        y: 385.4554271301072
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        cases:
+        - case_id: 'true'
+          conditions:
+          - comparison_operator: contains
+            id: 4a2607f7-9d5f-41c2-a550-570a00f54d65
+            sub_variable_condition:
+              case_id: 6728bed9-b07c-4ed3-9d3a-40e919e25aca
+              conditions:
+              - comparison_operator: in
+                id: 50cb0d89-5f46-42d1-bcaa-994922873d28
+                key: type
+                value:
+                - image
+                varType: string
+              logical_operator: and
+            value: ''
+            varType: array[file]
+            variable_selector:
+            - '1753084497988'
+            - upload
+          id: 'true'
+          logical_operator: and
+        - case_id: 425ca04e-8a73-417c-acc0-df5944c3fdb0
+          conditions:
+          - comparison_operator: contains
+            id: e3f3869f-cda9-4116-b216-579d9f15d180
+            sub_variable_condition:
+              case_id: 466a52bb-6247-4137-80a2-332f5f6be840
+              conditions:
+              - comparison_operator: in
+                id: 72eb5eb2-15e5-4503-a166-c31fca336e6c
+                key: type
+                value:
+                - document
+                varType: string
+              logical_operator: and
+            value: ''
+            varType: array[file]
+            variable_selector:
+            - '1753084497988'
+            - upload
+          id: 425ca04e-8a73-417c-acc0-df5944c3fdb0
+          logical_operator: and
+        desc: ''
+        selected: false
+        title: 文件类型
+        type: if-else
+      height: 222
+      id: '17531506868760'
+      position:
+        x: 303.7250566079716
+        y: 282
+      positionAbsolute:
+        x: 303.7250566079716
+        y: 282
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    viewport:
+      x: -730.233707894814
+      y: 113.08932073567709
+      zoom: 0.694477567882555
